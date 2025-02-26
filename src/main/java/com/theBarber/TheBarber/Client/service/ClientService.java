@@ -37,7 +37,6 @@ public class ClientService {
     public Page<ListResponseClient> list(int page, int size) {
         log.info("[Init] ClientService - list ");
         Pageable pageable = PageRequest.of(page, size);
-        //List<Client> clients = repository.findAll();
         log.info("[Finish] ClientService - list ");
         return repository.findAll(pageable).map(ListResponseClient::list);
     }

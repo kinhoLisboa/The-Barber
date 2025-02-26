@@ -1,7 +1,9 @@
 package com.theBarber.TheBarber.Barber.model;
 
+import com.theBarber.TheBarber.Barber.DTO.BarberRequest;
 import com.theBarber.TheBarber.Client.model.Client;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,4 +29,13 @@ public class Barber {
     private Addres addres;
     @OneToMany(mappedBy = "barber")
     private List<Appointment> appointments = new ArrayList<>();
+
+    public Barber(@Valid BarberRequest request) {
+        this.id =request.id();
+        this.name = request.name();
+        this.email = request.email();
+        this.cpf = request.cpf();
+        this.phone = request.phone();
+        this.addres = getAddres();
+    }
 }
