@@ -1,4 +1,11 @@
 package com.theBarber.TheBarber.Barber.DTO;
 
-public record UpdateBarber() {
+import com.theBarber.TheBarber.Barber.model.Addres;
+
+public record UpdateBarber(
+
+        String email,
+        String phone,
+        Addres addres
+) {
 }
