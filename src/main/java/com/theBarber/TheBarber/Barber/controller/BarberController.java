@@ -1,8 +1,7 @@
 package com.theBarber.TheBarber.Barber.controller;
 
-
-
 import com.theBarber.TheBarber.Barber.DTO.*;
+import com.theBarber.TheBarber.Barber.model.Barber;
 import com.theBarber.TheBarber.Barber.service.BarberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +24,10 @@ public class BarberController {
     @PostMapping
     public ResponseEntity<BarberResponse> create (@Valid @RequestBody BarberRequest request){
         log.info("[Init] BarberController - create ");
-        BarberResponse client = service.register(request);
-        URI location = URI.create("/barbeiro/" + client.id());
+        BarberResponse barber = service.register(request);
+        URI location = URI.create("/barbeiro/" + barber.id());
         log.info("[Finish] BarberController - create ");
-        return ResponseEntity.created(location).body(client);
+        return ResponseEntity.created(location).body(barber);
     }
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -63,6 +62,13 @@ public class BarberController {
         service.delete(id);
         log.info("[Finish] BarberController - delete ");
 
+    }
+    @PatchMapping("/{id}/status")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateStatus(@PathVariable UUID id, @RequestBody Barber status) {
+        log.info("[Init] BarberController - updateStatus ");
+        service.updateStatus(id, status);
+        log.info("[Finish] BarberController - updateStatus ");
 
     }
 }

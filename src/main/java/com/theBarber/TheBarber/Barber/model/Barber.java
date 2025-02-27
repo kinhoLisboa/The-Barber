@@ -1,6 +1,12 @@
 package com.theBarber.TheBarber.Barber.model;
 
+<<<<<<< HEAD
+=======
+import com.theBarber.TheBarber.Barber.DTO.BarberRequest;
+import com.theBarber.TheBarber.Barber.DTO.UpdateBarber;
+>>>>>>> feature/theBarber-barber
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,8 +28,37 @@ public class Barber {
     private String email;
     private String cpf;
     private String phone;
-    private StatusBarber status;
-    private Addres addres;
+    @Enumerated
+    private StatusBarber status = StatusBarber.OFFLINE;;
+    @Embedded
+    @Valid
+    private Address address;
     @OneToMany(mappedBy = "barber")
     private List<Appointment> appointments = new ArrayList<>();
+
+    public Barber(@Valid BarberRequest request) {
+        this.id =request.id();
+        this.name = request.name();
+        this.email = request.email();
+        this.cpf = request.cpf();
+        this.phone = request.phone();
+        this.status = request.status() != null ? request.status() : StatusBarber.OFFLINE;
+        if (request.address() != null) {
+            this.address = new Address(
+                    request.address().getStreet(),
+                    request.address().getDistrict(),
+                    request.address().getNumber(),
+                    request.address().getCity(),
+                    request.address().getState()
+            );
+        }
+    }
+
+    public Barber(UpdateBarber barber) {
+        this.name =barber.name();
+        this.email= barber.email();
+        this.cpf = barber.cpf();
+        this.phone = barber.phone();
+        this.address = barber.address();
+    }
 }
