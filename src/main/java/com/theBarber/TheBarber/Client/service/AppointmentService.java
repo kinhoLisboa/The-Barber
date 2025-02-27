@@ -7,8 +7,10 @@ import com.theBarber.TheBarber.Client.model.Appointment;
 import com.theBarber.TheBarber.Client.model.Client;
 import com.theBarber.TheBarber.Client.repository.AppointmentRepository;
 import com.theBarber.TheBarber.Client.repository.ClientRepository;
+import com.theBarber.TheBarber.handle.BarberException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,10 +32,10 @@ public class AppointmentService {
     public AppointmentResponse createAppointment(UUID barberId, UUID clientId, LocalDateTime appointmentTime) {
         log.info("[Init] AppointmentController - create ");
         Barber barber = barberRepository.findById(barberId)
-                .orElseThrow(() -> new RuntimeException("Barbeiro não encontrado"));
+                .orElseThrow(() -> BarberException.build(HttpStatus.BAD_REQUEST,"Barbeiro não encontrado"));
 
         Client client = clientRepository.findById(clientId)
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
+                .orElseThrow(() -> BarberException.build(HttpStatus.BAD_REQUEST,"Barbeiro não encontrado"));
 
 
         Appointment appointment = new Appointment();

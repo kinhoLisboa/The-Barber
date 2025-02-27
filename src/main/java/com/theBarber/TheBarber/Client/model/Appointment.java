@@ -1,7 +1,6 @@
 package com.theBarber.TheBarber.Client.model;
 
 import com.theBarber.TheBarber.Barber.model.Barber;
-import com.theBarber.TheBarber.Client.DTO.AppointmentRequest;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,6 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Appointment {
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
