@@ -1,6 +1,5 @@
 package com.theBarber.TheBarber.Barber.model;
 
-import com.theBarber.TheBarber.Client.model.Client;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
