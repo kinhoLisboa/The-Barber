@@ -3,8 +3,6 @@ package com.theBarber.TheBarber.Client.service;
 import com.theBarber.TheBarber.Client.DTO.*;
 import com.theBarber.TheBarber.Client.model.Client;
 import com.theBarber.TheBarber.Client.repository.ClientRepository;
-
-
 import com.theBarber.TheBarber.handle.BarberException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -14,7 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service

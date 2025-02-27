@@ -2,7 +2,6 @@ package com.theBarber.TheBarber.Barber.model;
 
 import com.theBarber.TheBarber.Barber.DTO.BarberRequest;
 import com.theBarber.TheBarber.Barber.DTO.UpdateBarber;
-import com.theBarber.TheBarber.Client.model.Client;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;

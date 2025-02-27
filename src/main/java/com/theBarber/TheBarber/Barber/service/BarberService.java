@@ -1,9 +1,6 @@
 package com.theBarber.TheBarber.Barber.service;
-
-
 import com.theBarber.TheBarber.Barber.DTO.*;
 import com.theBarber.TheBarber.Barber.model.Barber;
-import com.theBarber.TheBarber.Barber.model.StatusBarber;
 import com.theBarber.TheBarber.Barber.repository.BarberRepository;
 import com.theBarber.TheBarber.handle.BarberException;
 import jakarta.validation.Valid;

@@ -1,10 +1,7 @@
 package com.theBarber.TheBarber.Barber.controller;
 
-
-
 import com.theBarber.TheBarber.Barber.DTO.*;
 import com.theBarber.TheBarber.Barber.model.Barber;
-import com.theBarber.TheBarber.Barber.model.StatusBarber;
 import com.theBarber.TheBarber.Barber.service.BarberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
