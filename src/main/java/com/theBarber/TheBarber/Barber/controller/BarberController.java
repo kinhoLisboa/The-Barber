@@ -25,10 +25,10 @@ public class BarberController {
     @PostMapping
     public ResponseEntity<BarberResponse> create (@Valid @RequestBody BarberRequest request){
         log.info("[Init] BarberController - create ");
-        BarberResponse client = service.register(request);
-        URI location = URI.create("/barbeiro/" + client.id());
+        BarberResponse barber = service.register(request);
+        URI location = URI.create("/barbeiro/" + barber.id());
         log.info("[Finish] BarberController - create ");
-        return ResponseEntity.created(location).body(client);
+        return ResponseEntity.created(location).body(barber);
     }
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
