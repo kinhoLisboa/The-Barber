@@ -3,6 +3,7 @@ package com.theBarber.TheBarber.Barber.service;
 
 import com.theBarber.TheBarber.Barber.DTO.*;
 import com.theBarber.TheBarber.Barber.model.Barber;
+import com.theBarber.TheBarber.Barber.model.StatusBarber;
 import com.theBarber.TheBarber.Barber.repository.BarberRepository;
 import com.theBarber.TheBarber.handle.BarberException;
 import jakarta.validation.Valid;
@@ -28,7 +29,7 @@ public class BarberService {
         Barber barber = repository.save(new Barber(request));
         log.info("[Finish] BarberService - register ");
         return new BarberResponse( barber.getId(), barber.getName(),barber.getEmail(),
-                barber.getCpf(),barber.getPhone());
+                barber.getCpf(),barber.getPhone(), barber.getStatus());
 
 
     }
@@ -62,7 +63,7 @@ public class BarberService {
         log.info("[Init] BarberService - delete ");
         existsBarber(id);
         Barber barber= repository.getReferenceById(id);
-        repository.save(barber);
+        repository.delete(barber);
         log.info("[Finish] BarberService - delete ");
     }
 
@@ -70,5 +71,19 @@ public class BarberService {
         if (!repository.existsById(id)) {
             throw BarberException.build(HttpStatus.BAD_REQUEST, "Barbeiro não encontrado !");
         }
+    }
+
+    public void updateStatus(UUID id, Barber status) {
+        log.info("[Init] BarberService - updateStatus ");
+        existsBarber(id);
+        Barber barber = repository.getReferenceById(id);
+        if (barber.getStatus() == status.getStatus()) {
+            throw  BarberException.build(HttpStatus.BAD_REQUEST,
+                    "O status já está em " + status.getStatus());
+        }
+        barber.setStatus(status.getStatus());
+        repository.save(barber);
+        log.info("[Finish] BarberService - updateStatus ");
+
     }
 }

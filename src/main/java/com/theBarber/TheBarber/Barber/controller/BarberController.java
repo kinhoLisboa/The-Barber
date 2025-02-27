@@ -3,6 +3,8 @@ package com.theBarber.TheBarber.Barber.controller;
 
 
 import com.theBarber.TheBarber.Barber.DTO.*;
+import com.theBarber.TheBarber.Barber.model.Barber;
+import com.theBarber.TheBarber.Barber.model.StatusBarber;
 import com.theBarber.TheBarber.Barber.service.BarberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +65,13 @@ public class BarberController {
         service.delete(id);
         log.info("[Finish] BarberController - delete ");
 
+    }
+    @PatchMapping("/{id}/status")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateStatus(@PathVariable UUID id, @RequestBody Barber status) {
+        log.info("[Init] BarberController - updateStatus ");
+        service.updateStatus(id, status);
+        log.info("[Finish] BarberController - updateStatus ");
 
     }
 }

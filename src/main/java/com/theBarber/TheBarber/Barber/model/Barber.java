@@ -26,7 +26,8 @@ public class Barber {
     private String email;
     private String cpf;
     private String phone;
-    private StatusBarber status;
+    @Enumerated
+    private StatusBarber status = StatusBarber.OFFLINE;;
     @Embedded
     @Valid
     private Address address;
@@ -39,6 +40,7 @@ public class Barber {
         this.email = request.email();
         this.cpf = request.cpf();
         this.phone = request.phone();
+        this.status = request.status() != null ? request.status() : StatusBarber.OFFLINE;
         if (request.address() != null) {
             this.address = new Address(
                     request.address().getStreet(),
