@@ -1,6 +1,5 @@
 package com.theBarber.TheBarber.Client.model;
 
-import com.theBarber.TheBarber.Barber.model.Appointment;
 import com.theBarber.TheBarber.Client.DTO.CLientRequest;
 import com.theBarber.TheBarber.Client.DTO.UpdateClient;
 import jakarta.persistence.*;
@@ -24,7 +23,7 @@ public class Client {
     private String name;
     private String email;
     private String phone;
-    @OneToMany(mappedBy = "barber")
+    @OneToMany(mappedBy = "client")
     private List<Appointment> appointments = new ArrayList<>();
 
     public Client(CLientRequest request) {

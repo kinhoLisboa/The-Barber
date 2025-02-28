@@ -10,6 +10,7 @@ import java.util.UUID;
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, UUID> {
     boolean existsByBarberAndAppointmentTime(Barber barber, LocalDateTime appointmentTime);
+    boolean existsByBarberAndAppointmentTimeBetween(Barber barber, LocalDateTime startTime, LocalDateTime endTime);
 
 
 }

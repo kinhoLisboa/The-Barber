@@ -13,6 +13,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
@@ -21,6 +22,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Log4j2
 public class AppointmentService {
+
+    private static final Duration ATTENDANCE_DURATION = Duration.ofHours(1);
 
     private final AppointmentRepository appointmentRepository;
 
@@ -35,7 +38,7 @@ public class AppointmentService {
                 .orElseThrow(() -> BarberException.build(HttpStatus.BAD_REQUEST,"Barbeiro não encontrado"));
 
         Client client = clientRepository.findById(clientId)
-                .orElseThrow(() -> BarberException.build(HttpStatus.BAD_REQUEST,"Barbeiro não encontrado"));
+                .orElseThrow(() -> BarberException.build(HttpStatus.BAD_REQUEST,"Cliente não encontrado"));
 
         validateAppointmentTime(barber,appointmentTime);
 
@@ -55,8 +58,6 @@ public class AppointmentService {
             throw BarberException.build(HttpStatus.BAD_REQUEST,
                      "O horário do agendamento não pode estar no passado.");
         }
-
-        // Valida se o horário está dentro do expediente do barbeiro (exemplo: 09:00 - 19:00)
         LocalTime openingTime = LocalTime.of(9, 0);
         LocalTime closingTime = LocalTime.of(19, 0);
         LocalTime requestedTime = appointmentTime.toLocalTime();
@@ -67,6 +68,12 @@ public class AppointmentService {
         boolean isTimeTaken = appointmentRepository.existsByBarberAndAppointmentTime(barber, appointmentTime);
         if (isTimeTaken) {
             throw BarberException.build(HttpStatus.CONFLICT, "Este horário já está ocupado. Escolha outro horário.");
+        }
+        LocalDateTime endOfRequestedTime = appointmentTime.plus(ATTENDANCE_DURATION);
+
+        boolean isConflict = appointmentRepository.existsByBarberAndAppointmentTimeBetween(barber, appointmentTime, endOfRequestedTime);
+        if (isConflict) {
+            throw BarberException.build(HttpStatus.CONFLICT, "Este horário entra em conflito com outro agendamento. Escolha outro horário.");
         }
     }
 

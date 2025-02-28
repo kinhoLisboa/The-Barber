@@ -16,7 +16,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class Appointment {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
