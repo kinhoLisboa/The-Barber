@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Service
@@ -28,7 +29,6 @@ public class AppointmentService {
     private  final ClientRepository clientRepository;
 
 
-
     public AppointmentResponse createAppointment(UUID barberId, UUID clientId, LocalDateTime appointmentTime) {
         log.info("[Init] AppointmentController - create ");
         Barber barber = barberRepository.findById(barberId)
@@ -37,13 +37,37 @@ public class AppointmentService {
         Client client = clientRepository.findById(clientId)
                 .orElseThrow(() -> BarberException.build(HttpStatus.BAD_REQUEST,"Barbeiro não encontrado"));
 
+        validateAppointmentTime(barber,appointmentTime);
 
         Appointment appointment = new Appointment();
         appointment.setBarber(barber);
         appointment.setClient(client);
         appointment.setAppointmentTime(appointmentTime);
-        appointment.setStatus(Appointment.AppointmentStatus.PENDING);
-
-        return appointmentRepository.save(appointment);
+        appointmentRepository.save(appointment);
+        log.info("[Finish] AppointmentController - create ");
+        return new AppointmentResponse(appointment.getId(),
+                appointment.getAppointmentTime(),appointment.getStatus());
     }
+
+    private void validateAppointmentTime(Barber barber, LocalDateTime appointmentTime) {
+
+        if (appointmentTime.isBefore(LocalDateTime.now())) {
+            throw BarberException.build(HttpStatus.BAD_REQUEST,
+                     "O horário do agendamento não pode estar no passado.");
+        }
+
+        // Valida se o horário está dentro do expediente do barbeiro (exemplo: 09:00 - 19:00)
+        LocalTime openingTime = LocalTime.of(9, 0);
+        LocalTime closingTime = LocalTime.of(19, 0);
+        LocalTime requestedTime = appointmentTime.toLocalTime();
+
+        if (requestedTime.isBefore(openingTime) || requestedTime.isAfter(closingTime)) {
+            throw BarberException.build(HttpStatus.BAD_REQUEST, "O agendamento deve ser feito dentro do horário de expediente (09:00 - 19:00).");
+        }
+        boolean isTimeTaken = appointmentRepository.existsByBarberAndAppointmentTime(barber, appointmentTime);
+        if (isTimeTaken) {
+            throw BarberException.build(HttpStatus.CONFLICT, "Este horário já está ocupado. Escolha outro horário.");
+        }
+    }
+
 }

@@ -32,7 +32,7 @@ public class Appointment {
     private LocalDateTime appointmentTime;
 
     @Enumerated(EnumType.STRING)
-    private AppointmentStatus status;
+    private AppointmentStatus status = AppointmentStatus.PENDING;
 
 
 }

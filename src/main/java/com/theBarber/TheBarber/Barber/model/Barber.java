@@ -1,10 +1,8 @@
 package com.theBarber.TheBarber.Barber.model;
 
-<<<<<<< HEAD
-=======
 import com.theBarber.TheBarber.Barber.DTO.BarberRequest;
 import com.theBarber.TheBarber.Barber.DTO.UpdateBarber;
->>>>>>> feature/theBarber-barber
+import com.theBarber.TheBarber.Client.model.Appointment;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
