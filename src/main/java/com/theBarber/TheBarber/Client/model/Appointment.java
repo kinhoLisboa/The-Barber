@@ -1,11 +1,13 @@
 package com.theBarber.TheBarber.Client.model;
 
 import com.theBarber.TheBarber.Barber.model.Barber;
+import com.theBarber.TheBarber.handle.BarberException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -28,10 +30,47 @@ public class Appointment {
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
+    private LocalDateTime endTime;
+
     private LocalDateTime appointmentTime;
 
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status = AppointmentStatus.PENDING;
+
+    public void changeStatus(AppointmentStatus newStatus) {
+        // Verifica se a transição de status é permitida
+        if (this.status == AppointmentStatus.CANCELED) {
+            throw BarberException.build(HttpStatus.BAD_REQUEST, "Não é possível mudar o status de um agendamento cancelado.");
+        }
+
+        // Implementa outras validações dependendo do status
+        switch (newStatus) {
+            case CONFIRMED:
+                if (this.status != AppointmentStatus.PENDING) {
+                    throw BarberException.build(HttpStatus.BAD_REQUEST, "Só é possível confirmar agendamentos pendentes.");
+                }
+                break;
+            case CANCELED:
+                if (this.status == AppointmentStatus.COMPLETED) {
+                    throw BarberException.build(HttpStatus.BAD_REQUEST, "Não é possível cancelar um agendamento já concluído.");
+                }
+                break;
+            case COMPLETED:
+                if (this.status != AppointmentStatus.CONFIRMED) {
+                    throw BarberException.build(HttpStatus.BAD_REQUEST, "Só é possível concluir agendamentos confirmados.");
+                }
+                break;
+            case PENDING:
+                // A transição para PENDING pode ser feita em qualquer momento
+                break;
+            default:
+                throw BarberException.build(HttpStatus.BAD_REQUEST, "Status desconhecido.");
+        }
+
+        // Se a transição foi permitida, atualiza o status
+        this.status = newStatus;
+    }
+
 
 
 }
