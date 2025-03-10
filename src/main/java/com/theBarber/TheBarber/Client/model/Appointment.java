@@ -51,11 +51,11 @@ public class Appointment {
                 }
                 break;
             case CANCELED:
-                if (this.status == AppointmentStatus.COMPLETED) {
+                if (this.status == AppointmentStatus.FINALIZED) {
                     throw BarberException.build(HttpStatus.BAD_REQUEST, "Não é possível cancelar um agendamento já concluído.");
                 }
                 break;
-            case COMPLETED:
+            case FINALIZED:
                 if (this.status != AppointmentStatus.CONFIRMED) {
                     throw BarberException.build(HttpStatus.BAD_REQUEST, "Só é possível concluir agendamentos confirmados.");
                 }

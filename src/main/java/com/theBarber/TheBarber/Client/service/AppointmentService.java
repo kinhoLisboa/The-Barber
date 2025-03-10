@@ -131,6 +131,10 @@ public class AppointmentService {
                     .orElseThrow(() -> BarberException.build(HttpStatus.BAD_REQUEST,
                             "Erro ao encontrar o último agendamento"));
 
+            if (lastAppointment.getStatus() == AppointmentStatus.FINALIZED) {
+                return;
+            }
+
             LocalDateTime lastStartTime = lastAppointment.getAppointmentTime();
             // Se o último agendamento existe, verifica se o novo agendamento está pelo menos 60 minutos após
             if (appointmentTime.isBefore(lastStartTime.plusMinutes(60))) {
