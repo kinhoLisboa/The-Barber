@@ -1,5 +1,6 @@
 package com.theBarber.TheBarber.Client.DTO;
 
+import com.theBarber.TheBarber.Barber.DTO.BarberResponse;
 import com.theBarber.TheBarber.Client.model.AppointmentStatus;
 
 import java.time.LocalDateTime;

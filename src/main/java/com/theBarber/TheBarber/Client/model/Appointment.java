@@ -37,37 +37,37 @@ public class Appointment {
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status = AppointmentStatus.PENDING;
 
-    public void changeStatus(AppointmentStatus newStatus) {
-        // Verifica se a transição de status é permitida
-        if (this.status == AppointmentStatus.CANCELED) {
-            throw BarberException.build(HttpStatus.BAD_REQUEST, "Não é possível mudar o status de um agendamento cancelado.");
-        }
 
-        // Implementa outras validações dependendo do status
+    public void changeStatus(AppointmentStatus newStatus) {
+
+        if (this.status == AppointmentStatus.CANCELED) {
+            throw BarberException.build(HttpStatus.BAD_REQUEST, "Não é possível mudar o " +
+                    "status de um agendamento cancelado.");
+        }
         switch (newStatus) {
             case CONFIRMED:
                 if (this.status != AppointmentStatus.PENDING) {
-                    throw BarberException.build(HttpStatus.BAD_REQUEST, "Só é possível confirmar agendamentos pendentes.");
+                    throw BarberException.build(HttpStatus.BAD_REQUEST, "Só é possível confirmar " +
+                            "agendamentos pendentes.");
                 }
                 break;
             case CANCELED:
                 if (this.status == AppointmentStatus.FINALIZED) {
-                    throw BarberException.build(HttpStatus.BAD_REQUEST, "Não é possível cancelar um agendamento já concluído.");
+                    throw BarberException.build(HttpStatus.BAD_REQUEST, "Não é possível cancelar " +
+                            "um agendamento já concluído.");
                 }
                 break;
             case FINALIZED:
                 if (this.status != AppointmentStatus.CONFIRMED) {
-                    throw BarberException.build(HttpStatus.BAD_REQUEST, "Só é possível concluir agendamentos confirmados.");
+                    throw BarberException.build(HttpStatus.BAD_REQUEST, "Só é possível concluir " +
+                            "agendamentos confirmados.");
                 }
                 break;
             case PENDING:
-                // A transição para PENDING pode ser feita em qualquer momento
                 break;
             default:
                 throw BarberException.build(HttpStatus.BAD_REQUEST, "Status desconhecido.");
         }
-
-        // Se a transição foi permitida, atualiza o status
         this.status = newStatus;
     }
 

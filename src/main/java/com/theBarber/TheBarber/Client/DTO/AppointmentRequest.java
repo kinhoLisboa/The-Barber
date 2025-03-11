@@ -6,7 +6,9 @@ import java.util.UUID;
 public record AppointmentRequest(
 
          UUID barberId,
+
          UUID clientId,
+
          LocalDateTime appointmentTime
 ) {
 }

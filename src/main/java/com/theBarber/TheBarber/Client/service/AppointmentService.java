@@ -1,8 +1,9 @@
 package com.theBarber.TheBarber.Client.service;
 
+import com.theBarber.TheBarber.Barber.DTO.UpdateBarber;
 import com.theBarber.TheBarber.Barber.model.Barber;
 import com.theBarber.TheBarber.Barber.repository.BarberRepository;
-import com.theBarber.TheBarber.Client.DTO.AppointmentResponse;
+import com.theBarber.TheBarber.Client.DTO.*;
 import com.theBarber.TheBarber.Client.model.Appointment;
 import com.theBarber.TheBarber.Client.model.AppointmentStatus;
 import com.theBarber.TheBarber.Client.model.Client;
@@ -11,6 +12,9 @@ import com.theBarber.TheBarber.Client.repository.ClientRepository;
 import com.theBarber.TheBarber.handle.BarberException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +23,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -45,19 +48,43 @@ public class AppointmentService {
         return new AppointmentResponse(appointment.getId(),
                 appointment.getAppointmentTime(),appointment.getStatus());
     }
+    public Page<ListResponseAppointment> list(int page, int size) {
+        log.info("[Init] AppointmentService - listAppointments ");
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Appointment> appointments = appointmentRepository.findAllWithBarberAndClient(pageable);
+        log.info("[Finish] AppointmentService - listAppointments ");
+        return appointments.map(ListResponseAppointment::new);
+    }
+
+    public UpdateAppointmentResponse updateAppointmentByClientName(String clientName,
+                                                                   UpdateAppointmentRequest updateRequest) {
+        log.info("[Init] AppointmentService - updateAppointmentByClientName");
+        Appointment appointment = appointmentRepository.findByClientName(clientName)
+                .orElseThrow(() -> BarberException.build(HttpStatus.BAD_REQUEST,
+                        "Agendamento não encontrado para o cliente: " + clientName));
+
+        if (updateRequest.newDate() != null) {
+            appointment.setAppointmentTime(updateRequest.newDate());
+        }
+        if (updateRequest.newBarberName()!= null) {
+            Barber newBarber = barberRepository.findByName(updateRequest.newBarberName())
+                    .orElseThrow(() -> BarberException.build(HttpStatus.BAD_REQUEST,
+                            "Barbeiro não encontrado com esse nome: "));
+            appointment.setBarber(newBarber);
+        }
+        appointmentRepository.save(appointment);
+        log.info("[Finish] AppointmentService - updateAppointmentByClientName");
+        return new UpdateAppointmentResponse(appointment);
+    }
+
     public AppointmentResponse changeAppointmentStatus(UUID appointmentId, AppointmentStatus newStatus) {
         log.info("[Init] AppointmentService - changeAppointmentStatus ");
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() ->  BarberException.build(HttpStatus.NOT_FOUND, "Agendamento não encontrado"));
 
-        // Chama a lógica de mudança de status dentro da classe Appointment
         appointment.changeStatus(newStatus);
-
-        // Salva a alteração no banco de dados
         appointmentRepository.save(appointment);
         log.info("[Finish] AppointmentService - changeAppointmentStatus ");
-
-        // Retorna a resposta
         return new AppointmentResponse(appointment.getId(), appointment.getAppointmentTime(), appointment.getStatus());
     }
 
@@ -77,15 +104,15 @@ public class AppointmentService {
         return appointmentRepository.save(appointment);
     }
     private void validateAppointmentTime(Barber barber, LocalDateTime appointmentTime) {
-        // 1️⃣ Validação do agendamento no passado
+        // 1️ Validação do agendamento no passado
         validateAppointmentInPast(appointmentTime);
-        // 2️⃣ Validação do horário de expediente
+        // 2️ Validação do horário de expediente
         validateAppointmentWithinBusinessHours(appointmentTime);
-        // 3️⃣ Verificar se o horário já está ocupado
+        // 3️ Verificar se o horário já está ocupado
         validateAppointmentTimeAvailability(barber, appointmentTime);
-        // 4️⃣ Verificar se há sobreposição de horários
+        // 4️ Verificar se há sobreposição de horários
         validateAppointmentOverlap(barber, appointmentTime);
-        // 5️⃣ Verificar se o novo agendamento está pelo menos 60 minutos após o último agendamento
+        // 5️ Verificar se o novo agendamento está pelo menos 60 minutos após o último agendamento
         validateTimeBetweenAppointments(barber, appointmentTime);
     }
     private void validateAppointmentInPast(LocalDateTime appointmentTime) {
@@ -125,7 +152,6 @@ public class AppointmentService {
         List<Appointment> appointments = appointmentRepository.findByBarberId(barber.getId());
 
         if (!appointments.isEmpty()) {
-            // Ordena os agendamentos pelo horário de início (appointmentTime)
             Appointment lastAppointment = appointments.stream()
                     .max(Comparator.comparing(Appointment::getAppointmentTime))
                     .orElseThrow(() -> BarberException.build(HttpStatus.BAD_REQUEST,
@@ -134,9 +160,7 @@ public class AppointmentService {
             if (lastAppointment.getStatus() == AppointmentStatus.FINALIZED) {
                 return;
             }
-
             LocalDateTime lastStartTime = lastAppointment.getAppointmentTime();
-            // Se o último agendamento existe, verifica se o novo agendamento está pelo menos 60 minutos após
             if (appointmentTime.isBefore(lastStartTime.plusMinutes(60))) {
                 throw BarberException.build(HttpStatus.CONFLICT,
                         "O novo agendamento deve ser feito pelo menos 60 minutos após o início do agendamento anterior.");
