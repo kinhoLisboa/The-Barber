@@ -33,6 +33,5 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
 """)
     Page<Appointment> findAllWithBarberAndClient(Pageable pageable);
 
-    @Query("SELECT a FROM Appointment a WHERE a.client.name = :clientName")
-    Optional<Appointment> findByClientName(String clientName);
+    Optional<Appointment> findByClientId(UUID clientId);
 }

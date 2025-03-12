@@ -56,25 +56,33 @@ public class AppointmentService {
         return appointments.map(ListResponseAppointment::new);
     }
 
-    public UpdateAppointmentResponse updateAppointmentByClientName(String clientName,
+    public UpdateAppointmentResponse updateAppointmentByClientId(UUID clientId,
                                                                    UpdateAppointmentRequest updateRequest) {
-        log.info("[Init] AppointmentService - updateAppointmentByClientName");
-        Appointment appointment = appointmentRepository.findByClientName(clientName)
-                .orElseThrow(() -> BarberException.build(HttpStatus.BAD_REQUEST,
-                        "Agendamento não encontrado para o cliente: " + clientName));
+        log.info("[Init] AppointmentService - updateAppointmentByClientId");
+        existsClient(clientId);
+        Appointment appointment = appointmentRepository.findByClientId(clientId).get();
 
         if (updateRequest.newDate() != null) {
             appointment.setAppointmentTime(updateRequest.newDate());
         }
-        if (updateRequest.newBarberName()!= null) {
-            Barber newBarber = barberRepository.findByName(updateRequest.newBarberName())
-                    .orElseThrow(() -> BarberException.build(HttpStatus.BAD_REQUEST,
-                            "Barbeiro não encontrado com esse nome: "));
+        if (updateRequest.newBarberId() != null) {
+            Barber newBarber = barberRepository.findById(updateRequest.newBarberId())
+                    .orElseThrow(() -> BarberException.build(HttpStatus.NOT_FOUND,
+                            "Barbeiro não encontrado!"));
             appointment.setBarber(newBarber);
         }
         appointmentRepository.save(appointment);
-        log.info("[Finish] AppointmentService - updateAppointmentByClientName");
+        log.info("[Finish] AppointmentService - updateAppointmentByClientId");
         return new UpdateAppointmentResponse(appointment);
+    }
+
+    public void delete(UUID id) {
+        log.info("[Init] AppointmentService - delete");
+        Appointment  appointment = appointmentRepository.findById(id)
+                .orElseThrow(()->BarberException.build(HttpStatus.BAD_REQUEST,
+                        "Agendamento não encontrado!"));
+        appointmentRepository.delete(appointment);
+        log.info("[Finish] AppointmentService - delete");
     }
 
     public AppointmentResponse changeAppointmentStatus(UUID appointmentId, AppointmentStatus newStatus) {
@@ -167,5 +175,4 @@ public class AppointmentService {
             }
         }
     }
-
 }

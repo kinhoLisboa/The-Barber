@@ -42,15 +42,23 @@ public class AppointmentController {
         log.info("[Finish] AppointmentController - getList ");
         return response;
     }
-    @PutMapping("/update/{clientName}")
+    @PutMapping("/update/{clientId}")
     @ResponseStatus(HttpStatus.OK)
-    public UpdateAppointmentResponse updateAppointment(@PathVariable String clientName,
+    public UpdateAppointmentResponse updateAppointment(@PathVariable UUID clientId,
                 @RequestBody UpdateAppointmentRequest updateRequest) {
         log.info("[Init] AppointmentController - updateAppointment");
-        UpdateAppointmentResponse updated = appointmentService.updateAppointmentByClientName(
-                clientName, updateRequest);
+        UpdateAppointmentResponse updated = appointmentService.updateAppointmentByClientId(
+                clientId, updateRequest);
         log.info("[Finish] AppointmentController - updateAppointment");
         return updated;
+    }
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAppointment (@PathVariable UUID id){
+        log.info("[Init] AppointmentController - deleteAppointment");
+        appointmentService.delete(id);
+        log.info("[Finish] AppointmentController - deleteAppointment");
+
     }
     @PatchMapping("/{id}/status")
     @ResponseStatus(HttpStatus.OK)
