@@ -34,8 +34,12 @@ public class ClientService {
     public Page<ListResponseClient> list(int page, int size) {
         log.info("[Init] ClientService - list ");
         Pageable pageable = PageRequest.of(page, size);
+        Page<Client> clients = repository.findAll(pageable);
+        if( clients.isEmpty()){
+            BarberException.build(HttpStatus.NOT_FOUND,"Nenhum cliente encontrado!");
+        }
         log.info("[Finish] ClientService - list ");
-        return repository.findAll(pageable).map(ListResponseClient::list);
+        return clients.map(ListResponseClient::list);
     }
 
 

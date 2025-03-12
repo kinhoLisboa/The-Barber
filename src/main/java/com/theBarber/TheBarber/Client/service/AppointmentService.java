@@ -52,6 +52,10 @@ public class AppointmentService {
         log.info("[Init] AppointmentService - listAppointments ");
         Pageable pageable = PageRequest.of(page, size);
         Page<Appointment> appointments = appointmentRepository.findAllWithBarberAndClient(pageable);
+        if (appointments.isEmpty()) {
+            throw BarberException.build(HttpStatus.NOT_FOUND,
+                    "Nenhum agendamento encontrado.");
+        }
         log.info("[Finish] AppointmentService - listAppointments ");
         return appointments.map(ListResponseAppointment::new);
     }
