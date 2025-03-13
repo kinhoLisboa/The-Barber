@@ -61,7 +61,5 @@ public class ClientController {
         log.info("[Init] ClientController - delete ");
         service.delete(id);
         log.info("[Finish] ClientController - delete ");
-
-
     }
 }

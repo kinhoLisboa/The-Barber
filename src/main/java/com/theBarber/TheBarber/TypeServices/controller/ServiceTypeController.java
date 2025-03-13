@@ -1,16 +1,17 @@
 package com.theBarber.TheBarber.TypeServices.controller;
 
-
+import com.theBarber.TheBarber.TypeServices.DTO.ListResponseTypeService;
+import com.theBarber.TheBarber.TypeServices.DTO.UpdateServiceTypes;
 import com.theBarber.TheBarber.TypeServices.service.ServiceTypeService;
 import com.theBarber.TheBarber.TypeServices.DTO.ServiceTypeResponse;
 import com.theBarber.TheBarber.TypeServices.DTO.ServiceTypeRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController("/tipoServicos")
 @RequiredArgsConstructor
@@ -21,32 +22,39 @@ public class ServiceTypeController {
 
 
     @GetMapping
-    public ResponseEntity<List<Service>> listAll() {
-        return ResponseEntity.ok(serviceService.listAll());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Service> findById(@PathVariable UUID id) {
-        return ResponseEntity.ok(serviceService.findById(id));
+    @ResponseStatus(HttpStatus.OK)
+    public Page<ListResponseTypeService> getList(@RequestParam(defaultValue = "0") int page,
+                                            @RequestParam(defaultValue = "10") int size) {
+        log.info("[Init] ServiceTypeController - getList ");
+        Page<ListResponseTypeService> response = service.list(page, size);
+        log.info("[Finish] ServiceTypeController - getList ");
+        return response;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ServiceTypeResponse create(@RequestBody ServiceTypeRequest newService) {
         log.info("[Init] ServiceTypeController - create ");
-        ServiceTypeResponse response = service.registes(newService);
+        ServiceTypeResponse response = service.register(newService);
         log.info("[Finish] ServiceTypeController - create ");
         return response;
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Service> updateService(@PathVariable UUID id, @RequestBody Service updatedService) {
-        return ResponseEntity.ok(serviceService.updateService(id, updatedService));
+    @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void update (@RequestBody UpdateServiceTypes types , @PathVariable UUID id ){
+        log.info("[Init] ServiceTypeController - update ");
+        service.alter(types, id);
+        log.info("[Finish] ServiceTypeController - update ");
+
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteService(@PathVariable UUID id) {
-        serviceService.deleteService(id);
-        return ResponseEntity.noContent().build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable UUID id){
+        log.info("[Init] ServiceTypeController - delete ");
+        service.delete(id);
+        log.info("[Finish] ServiceTypeController - delete ");
     }
 }
+

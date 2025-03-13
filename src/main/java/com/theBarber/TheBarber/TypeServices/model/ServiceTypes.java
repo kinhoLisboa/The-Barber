@@ -1,6 +1,7 @@
 package com.theBarber.TheBarber.TypeServices.model;
 
 import com.theBarber.TheBarber.TypeServices.DTO.ServiceTypeRequest;
+import com.theBarber.TheBarber.TypeServices.DTO.UpdateServiceTypes;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,5 +28,10 @@ public class ServiceTypes {
         this.name = newService.name();
         this.price = newService.price();
         this.description = newService.description();
+    }
+
+    public ServiceTypes(UpdateServiceTypes types) {
+        this.name= types.name();
+        this.price = types.price();
     }
 }
