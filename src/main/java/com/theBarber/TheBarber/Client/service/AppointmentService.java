@@ -9,6 +9,9 @@ import com.theBarber.TheBarber.Client.model.AppointmentStatus;
 import com.theBarber.TheBarber.Client.model.Client;
 import com.theBarber.TheBarber.Client.repository.AppointmentRepository;
 import com.theBarber.TheBarber.Client.repository.ClientRepository;
+import com.theBarber.TheBarber.TypeServices.DTO.ServiceTypeResponse;
+import com.theBarber.TheBarber.TypeServices.model.ServiceTypes;
+import com.theBarber.TheBarber.TypeServices.repository.ServiceTypeRepository;
 import com.theBarber.TheBarber.handle.BarberException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -38,16 +41,22 @@ public class AppointmentService {
 
     private  final ClientRepository clientRepository;
 
-    public AppointmentResponse createAppointment(UUID barberId, UUID clientId, LocalDateTime appointmentTime) {
+    private final ServiceTypeRepository serviceTypeRepository;
+
+    public AppointmentResponse createAppointment(UUID barberId, UUID clientId,
+                                                 LocalDateTime appointmentTime, List<UUID> servicesId) {
         log.info("[Init] AppointmentService - createAppointment ");
         Barber barber = existsBarber(barberId);
         Client client = existsClient(clientId);
         validateAppointmentTime(barber,appointmentTime);
-        Appointment appointment = create(barber,client,appointmentTime);
+        Appointment appointment = create(barber,client,appointmentTime,servicesId);
         log.info("[Finish] AppointmentService - createAppointment ");
         return new AppointmentResponse(appointment.getId(),
-                appointment.getAppointmentTime(),appointment.getStatus());
+                appointment.getAppointmentTime(),appointment.getStatus(),appointment.getServices()
+                .stream().map(s -> new ServiceTypeResponse(s.getId(),s.getName(), s.getPrice()))
+                .toList());
     }
+
     public Page<ListResponseAppointment> list(int page, int size) {
         log.info("[Init] AppointmentService - listAppointments ");
         Pageable pageable = PageRequest.of(page, size);
@@ -97,7 +106,8 @@ public class AppointmentService {
         appointment.changeStatus(newStatus);
         appointmentRepository.save(appointment);
         log.info("[Finish] AppointmentService - changeAppointmentStatus ");
-        return new AppointmentResponse(appointment.getId(), appointment.getAppointmentTime(), appointment.getStatus());
+        return new AppointmentResponse(appointment.getId(), appointment.getAppointmentTime(),
+                appointment.getStatus());
     }
 
     private Barber existsBarber(UUID barberId) {
@@ -108,11 +118,16 @@ public class AppointmentService {
         return clientRepository.findById(clientId)
                 .orElseThrow(() -> BarberException.build(HttpStatus.BAD_REQUEST, "Cliente não encontrado"));
     }
-    private Appointment create(Barber barber, Client client, LocalDateTime appointmentTime) {
+    private Appointment create(Barber barber, Client client, LocalDateTime appointmentTime, List<UUID> servicesId) {
+        List<ServiceTypes> services = serviceTypeRepository.findAllById(servicesId);
+        if(services.isEmpty()){
+            BarberException.build(HttpStatus.NOT_FOUND,"Serviços não encotrados!");
+        }
         Appointment appointment = new Appointment();
         appointment.setBarber(barber);
         appointment.setClient(client);
         appointment.setAppointmentTime(appointmentTime);
+        appointment.setServices(services);
         return appointmentRepository.save(appointment);
     }
     private void validateAppointmentTime(Barber barber, LocalDateTime appointmentTime) {

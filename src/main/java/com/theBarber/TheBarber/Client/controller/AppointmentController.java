@@ -28,7 +28,7 @@ public class AppointmentController {
     public AppointmentResponse create (@RequestBody @Valid AppointmentRequest request){
         log.info("[Init] AppointmentController - create ");
         AppointmentResponse response = appointmentService.createAppointment(request.barberId(),
-                request.clientId(), request.appointmentTime());
+                request.clientId(), request.appointmentTime(),request.servicesId());
         log.info("[Finish] AppointmentController - create ");
         return response;
 

@@ -1,6 +1,7 @@
 package com.theBarber.TheBarber.Client.DTO;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public record AppointmentRequest(
@@ -9,6 +10,7 @@ public record AppointmentRequest(
 
          UUID clientId,
 
-         LocalDateTime appointmentTime
+         LocalDateTime appointmentTime,
+         List<UUID> servicesId
 ) {
 }

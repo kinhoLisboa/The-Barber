@@ -1,6 +1,8 @@
 package com.theBarber.TheBarber.Client.model;
 
 import com.theBarber.TheBarber.Barber.model.Barber;
+import com.theBarber.TheBarber.TypeServices.DTO.ServiceTypeRequest;
+import com.theBarber.TheBarber.TypeServices.model.ServiceTypes;
 import com.theBarber.TheBarber.handle.BarberException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,6 +12,8 @@ import lombok.Setter;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 @Getter
 @Setter
@@ -36,6 +40,14 @@ public class Appointment {
 
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status = AppointmentStatus.PENDING;
+
+    @ManyToMany
+    @JoinTable(
+            name = "appointment_service",
+            joinColumns = @JoinColumn(name = "appointment_id"),
+            inverseJoinColumns = @JoinColumn(name = "service_type_id")
+    )
+    private List<ServiceTypes> services = new ArrayList<>();
 
 
     public void changeStatus(AppointmentStatus newStatus) {

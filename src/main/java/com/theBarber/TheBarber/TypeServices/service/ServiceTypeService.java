@@ -28,7 +28,7 @@ public class ServiceTypeService {
         log.info("[Init] ServiceTypeRepository - register ");
         ServiceTypes types = repository.save(new ServiceTypes(newService));
         log.info("[Finish] ServiceTypeRepository - register ");
-        return new ServiceTypeResponse(types.getName(),types.getPrice());
+        return new ServiceTypeResponse(types.getId(),types.getName(),types.getPrice());
     }
 
     public Page<ListResponseTypeService> list(int page, int size) {
