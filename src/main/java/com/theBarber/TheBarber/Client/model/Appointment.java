@@ -1,7 +1,6 @@
 package com.theBarber.TheBarber.Client.model;
 
 import com.theBarber.TheBarber.Barber.model.Barber;
-import com.theBarber.TheBarber.TypeServices.DTO.ServiceTypeRequest;
 import com.theBarber.TheBarber.TypeServices.model.ServiceTypes;
 import com.theBarber.TheBarber.handle.BarberException;
 import jakarta.persistence.*;

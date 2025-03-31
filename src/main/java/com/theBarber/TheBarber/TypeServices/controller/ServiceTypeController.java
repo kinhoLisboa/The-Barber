@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@RestController("/tipoServicos")
+@RestController
+@RequestMapping("/tipoServiços")
 @RequiredArgsConstructor
 @Log4j2
 public class ServiceTypeController {

@@ -12,6 +12,7 @@ import com.theBarber.TheBarber.Client.repository.ClientRepository;
 import com.theBarber.TheBarber.TypeServices.DTO.ServiceTypeResponse;
 import com.theBarber.TheBarber.TypeServices.model.ServiceTypes;
 import com.theBarber.TheBarber.TypeServices.repository.ServiceTypeRepository;
+import com.theBarber.TheBarber.WSServices.WhatsAppService;
 import com.theBarber.TheBarber.handle.BarberException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -43,6 +45,8 @@ public class AppointmentService {
 
     private final ServiceTypeRepository serviceTypeRepository;
 
+    private final WhatsAppService whatsappService;
+
     public AppointmentResponse createAppointment(UUID barberId, UUID clientId,
                                                  LocalDateTime appointmentTime, List<UUID> servicesId) {
         log.info("[Init] AppointmentService - createAppointment ");
@@ -50,6 +54,7 @@ public class AppointmentService {
         Client client = existsClient(clientId);
         validateAppointmentTime(barber,appointmentTime);
         Appointment appointment = create(barber,client,appointmentTime,servicesId);
+
         log.info("[Finish] AppointmentService - createAppointment ");
         return new AppointmentResponse(appointment.getId(),
                 appointment.getAppointmentTime(),appointment.getStatus(),appointment.getServices()
@@ -94,6 +99,7 @@ public class AppointmentService {
         Appointment  appointment = appointmentRepository.findById(id)
                 .orElseThrow(()->BarberException.build(HttpStatus.BAD_REQUEST,
                         "Agendamento não encontrado!"));
+        appointment.getServices().clear();
         appointmentRepository.delete(appointment);
         log.info("[Finish] AppointmentService - delete");
     }
@@ -121,14 +127,37 @@ public class AppointmentService {
     private Appointment create(Barber barber, Client client, LocalDateTime appointmentTime, List<UUID> servicesId) {
         List<ServiceTypes> services = serviceTypeRepository.findAllById(servicesId);
         if(services.isEmpty()){
-            BarberException.build(HttpStatus.NOT_FOUND,"Serviços não encotrados!");
+            throw BarberException.build(HttpStatus.NOT_FOUND,"Serviços não encotrados!");
         }
         Appointment appointment = new Appointment();
         appointment.setBarber(barber);
         appointment.setClient(client);
         appointment.setAppointmentTime(appointmentTime);
         appointment.setServices(services);
-        return appointmentRepository.save(appointment);
+        appointment = appointmentRepository.save(appointment);
+
+        sendConfirmationMessage(client, appointment.getAppointmentTime());
+        return appointment;
+
+    }
+    private void sendConfirmationMessage(Client client, LocalDateTime appointmentTime) {
+        String formattedPhone = formatPhone(client.getPhone());
+        String message = "✅ Olá, " + client.getName() + "! Seu agendamento foi confirmado para "
+                + appointmentTime.toLocalDate() + " às " + appointmentTime.toLocalTime() + ". Nos vemos em breve! ✂️💈";
+
+        try {
+            whatsappService.sendWhatsAppMessage(formattedPhone, message);
+            log.info("Mensagem enviada para: " + formattedPhone);
+        } catch (Exception e) {
+            log.error("Erro ao enviar mensagem para o cliente: " + formattedPhone, e);
+        }
+    }
+    private String formatPhone(String phone) {
+        String formattedPhone = phone.replaceAll("[^0-9]", ""); // Remove caracteres não numéricos
+        if (!formattedPhone.startsWith("55")) {
+            formattedPhone = "55" + formattedPhone; // Adiciona DDI do Brasil se não estiver presente
+        }
+        return formattedPhone;
     }
     private void validateAppointmentTime(Barber barber, LocalDateTime appointmentTime) {
         // 1️ Validação do agendamento no passado

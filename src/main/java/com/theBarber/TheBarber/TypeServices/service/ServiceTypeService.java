@@ -53,6 +53,7 @@ public class ServiceTypeService {
         repository.delete(type);
         log.info("[Finish] ServiceTypeRepository - delete ");
     }
+
     public void exists(UUID id) {
         if (!repository.existsById(id)) {
             throw BarberException.build(HttpStatus.BAD_REQUEST, "Serviço não encontrado !");
