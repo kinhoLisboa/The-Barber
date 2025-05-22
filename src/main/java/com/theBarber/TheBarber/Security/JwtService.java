@@ -25,8 +25,12 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
+        long expirationMillis = 1000 * 60 * 60 * 24; // 24 horas
+
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
                 .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -52,6 +56,8 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody()
                 .getExpiration();
+        if (expiration == null) return true;
+
         return expiration.before(new Date());
     }
 }

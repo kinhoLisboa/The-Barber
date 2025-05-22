@@ -4,6 +4,7 @@ import com.theBarber.TheBarber.Barber.model.Barber;
 import com.theBarber.TheBarber.Barber.repository.BarberRepository;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -23,6 +24,6 @@ public class BarberUserDetailsService implements UserDetailsService {
         Barber barber = barberRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Barber not found"));
 
-        return new User(barber.getEmail(), barber.getPassword(), List.of());
+        return new User(barber.getUsername(), barber.getPassword(), List.of(new SimpleGrantedAuthority("User")));
     }
 }
