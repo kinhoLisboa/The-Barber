@@ -8,6 +8,8 @@ import java.util.UUID;
 public record BarberRequest(
          UUID id,
          String name,
+         String username,
+         String password,
          String email,
          String cpf,
          String phone,

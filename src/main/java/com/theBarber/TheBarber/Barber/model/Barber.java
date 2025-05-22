@@ -23,6 +23,8 @@ public class Barber {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
     private String name;
+    private String username;
+    private String password;
     private String email;
     private String cpf;
     private String phone;
@@ -34,9 +36,11 @@ public class Barber {
     @OneToMany(mappedBy = "barber")
     private List<Appointment> appointments = new ArrayList<>();
 
-    public Barber(@Valid BarberRequest request) {
+    public Barber(@Valid BarberRequest request, String encryptedPassword) {
         this.id =request.id();
         this.name = request.name();
+        this.username = request.username();
+        this.password = encryptedPassword;
         this.email = request.email();
         this.cpf = request.cpf();
         this.phone = request.phone();

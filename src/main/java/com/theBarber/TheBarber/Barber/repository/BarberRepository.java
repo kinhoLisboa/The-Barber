@@ -13,4 +13,5 @@ public interface BarberRepository extends JpaRepository<Barber, UUID> {
 
       Optional<Barber> findByName(String name);
 
+    Optional<Barber> findByUsername(String username);
 }

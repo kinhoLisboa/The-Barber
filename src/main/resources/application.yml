@@ -28,3 +28,6 @@ logging:
   level:
     com.theBarber.TheBarber.WSServices.WhatsAppClient: DEBUG
 
+jwt:
+  secret: "3z!8Ue$L@V7jR9p^YgBxTzQ*FgPqHsKm"
+
