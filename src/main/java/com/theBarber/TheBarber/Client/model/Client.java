@@ -21,15 +21,19 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
     private String name;
+    @Column(unique = true, nullable = false)
     private String email;
+    private String password;
     private String phone;
     @OneToMany(mappedBy = "client")
     private List<Appointment> appointments = new ArrayList<>();
+
 
     public Client(CLientRequest request) {
         this.id = request.id();
         this.name = request.name();
         this.email = request.email();
+        this.password = request.password();
         this.phone = request.phone();
     }
 

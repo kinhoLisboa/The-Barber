@@ -1,16 +1,14 @@
 package com.theBarber.TheBarber.Client.controller;
-
-import com.theBarber.TheBarber.Barber.DTO.BarberResponse;
-import com.theBarber.TheBarber.Barber.DTO.UpdateBarber;
-import com.theBarber.TheBarber.Barber.model.Barber;
 import com.theBarber.TheBarber.Client.DTO.*;
-import com.theBarber.TheBarber.Client.model.AppointmentStatus;
 import com.theBarber.TheBarber.Client.service.AppointmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -62,9 +60,15 @@ public class AppointmentController {
     }
     @PatchMapping("/{id}/status")
     @ResponseStatus(HttpStatus.OK)
-    public AppointmentResponse changeStatus(@PathVariable UUID id, @RequestBody AppointmentStatusRequest status) {
+    public AppointmentResponse changeStatus(@PathVariable UUID id,
+                                            @RequestBody AppointmentStatusRequest status,
+                                            Authentication auth) {
         log.info("[Init] AppointmentController - changeStatus ");
-        AppointmentResponse response = appointmentService.changeAppointmentStatus(id, status.newStatus());
+        String username = null;
+        if (auth != null && auth.isAuthenticated() && !(auth instanceof AnonymousAuthenticationToken)) {
+            username = auth.getName();
+        }
+        AppointmentResponse response = appointmentService.changeAppointmentStatus(id, status.newStatus(), username);
         log.info("[Finish] AppointmentController - changeStatus ");
         return response;
     }

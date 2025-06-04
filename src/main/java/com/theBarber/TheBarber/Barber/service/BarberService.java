@@ -1,6 +1,7 @@
 package com.theBarber.TheBarber.Barber.service;
 import com.theBarber.TheBarber.Barber.DTO.*;
 import com.theBarber.TheBarber.Barber.model.Barber;
+import com.theBarber.TheBarber.Barber.model.Role;
 import com.theBarber.TheBarber.Barber.repository.BarberRepository;
 import com.theBarber.TheBarber.handle.BarberException;
 import jakarta.validation.Valid;
@@ -10,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,11 +28,14 @@ public class BarberService {
 
     public BarberResponse register(@Valid BarberRequest request) {
         log.info("[Init] BarberService - register ");
+        existsAdmin(request);
+        existEmail(request);
+        validateAdminCreationPermission();
         String encryptedPassword = passwordEncoder.encode(request.password());
         Barber barber = repository.save(new Barber(request, encryptedPassword));
         log.info("[Finish] BarberService - register ");
         return new BarberResponse( barber.getId(), barber.getName(),barber.getEmail(),
-                barber.getCpf(),barber.getPhone(), barber.getStatus());
+                barber.getCpf(),barber.getPhone());
 
 
     }
@@ -72,18 +78,38 @@ public class BarberService {
             throw BarberException.build(HttpStatus.BAD_REQUEST, "Barbeiro não encontrado !");
         }
     }
-
-    public void updateStatus(UUID id, Barber status) {
-        log.info("[Init] BarberService - updateStatus ");
-        existsBarber(id);
-        Barber barber = repository.getReferenceById(id);
-        if (barber.getStatus() == status.getStatus()) {
-            throw  BarberException.build(HttpStatus.BAD_REQUEST,
-                    "O status já está em " + status.getStatus());
+    public void existsAdmin(BarberRequest request){
+        if (request.role() == Role.BARBEIRO && !repository.existsByRole(Role.ADMIN)) {
+            throw BarberException.build(HttpStatus.BAD_REQUEST,"Você precisa cadastrar um administrador antes de criar barbeiros.");
         }
-        barber.setStatus(status.getStatus());
-        repository.save(barber);
-        log.info("[Finish] BarberService - updateStatus ");
-
+        if (request.role() == Role.ADMIN) {
+            boolean exists = repository.existsByRole(Role.ADMIN);
+            if (exists) {
+                throw BarberException.build(HttpStatus.BAD_REQUEST,"Já existe um administrador cadastrado.");
+            }
+        }
     }
+    public void existEmail(BarberRequest request){
+        if (repository.existsByEmail(request.email())) {
+            throw BarberException.build(HttpStatus.BAD_REQUEST,
+                    "Já existe um barbeiro com este e-mail.");
+        }
+    }
+    public void validateAdminCreationPermission() {
+        boolean adminExists = repository.existsByRole(Role.ADMIN);
+
+        if (adminExists) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                throw BarberException.build(HttpStatus.BAD_REQUEST,"Você precisa estar autenticado como ADMIN para criar um barbeiro.");
+            }
+            boolean isAdmin = authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            if (!isAdmin) {
+                throw BarberException.build(HttpStatus.BAD_REQUEST,"Apenas administradores podem cadastrar barbeiros.");
+            }
+        }
+    }
+
+
 }

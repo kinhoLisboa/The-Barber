@@ -1,7 +1,10 @@
-package com.theBarber.TheBarber.Security;
+package com.theBarber.TheBarber.Security.controller;
 
+import com.theBarber.TheBarber.Security.DTO.AuthenticationBarberRequest;
+import com.theBarber.TheBarber.Security.DTO.AuthenticationBarberResponse;
+import com.theBarber.TheBarber.Security.cofigurations.JwtService;
+import com.theBarber.TheBarber.Security.service.BarberUserDetailsService;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/auth")
-public class AuthController {
+public class BarberAuthController {
 
 
     private AuthenticationManager authenticationManager;
@@ -24,15 +27,15 @@ public class AuthController {
     private BarberUserDetailsService userDetailsService;
 
     @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest request) {
+    public ResponseEntity<AuthenticationBarberResponse> login(@RequestBody AuthenticationBarberRequest request) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.username(), request.password())
+                new UsernamePasswordAuthenticationToken(request.email(), request.password())
         );
 
-        UserDetails user = userDetailsService.loadUserByUsername(request.username());
+        UserDetails user = userDetailsService.loadUserByUsername(request.email());
         String token = jwtService.generateToken(user);
 
-        return ResponseEntity.ok(new AuthenticationResponse(token));
+        return ResponseEntity.ok(new AuthenticationBarberResponse(token));
     }
 
 }

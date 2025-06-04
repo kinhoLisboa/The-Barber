@@ -1,22 +1,24 @@
 package com.theBarber.TheBarber.Client.DTO;
-
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+
 
 import java.util.UUID;
 
 public record CLientRequest(
 
         UUID id,
-        @NotBlank
+
+        @NotBlank(message = "O nome é obrigatório")
         String name,
-        @NotBlank
-        @Email
-        @Column(unique = true, nullable = false)
+
+        @NotBlank(message = "O email é obrigatório")
+        @Email(message = "Email inválido")
         String email,
-        @NotNull
+        @NotBlank(message = " Campo senha não pode esta em branco")
+        String password,
+
+        @NotBlank(message = "O telefone é obrigatório")
         String phone
 ) {
 }

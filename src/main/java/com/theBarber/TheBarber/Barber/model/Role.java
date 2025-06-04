@@ -1,6 +1,6 @@
 package com.theBarber.TheBarber.Barber.model;
 
-public enum StatusBarber {
+public enum Role {
 
-    ONLINE, OFFLINE
+    ADMIN, BARBEIRO
 }

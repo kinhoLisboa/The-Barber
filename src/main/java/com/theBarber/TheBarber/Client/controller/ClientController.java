@@ -49,7 +49,7 @@ public class ClientController {
     }
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void update (@RequestBody UpdateClient client ,@PathVariable UUID id ){
+    public void update (@RequestBody @Valid UpdateClient client ,@PathVariable UUID id ){
         log.info("[Init] ClientController - update ");
         service.alter(client, id);
         log.info("[Finish] ClientController - update ");

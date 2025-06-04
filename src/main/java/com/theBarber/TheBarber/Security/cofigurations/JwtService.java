@@ -1,4 +1,4 @@
-package com.theBarber.TheBarber.Security;
+package com.theBarber.TheBarber.Security.cofigurations;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -37,7 +37,7 @@ public class JwtService {
 
     public String extractUsername(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(secretKey)  // usa a SecretKey inicializada
+                .setSigningKey(secretKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()

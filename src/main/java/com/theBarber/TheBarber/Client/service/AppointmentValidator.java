@@ -1,7 +1,6 @@
 package com.theBarber.TheBarber.Client.service;
 
 import com.theBarber.TheBarber.Barber.model.Barber;
-import com.theBarber.TheBarber.Barber.model.StatusBarber;
 import com.theBarber.TheBarber.Client.model.Appointment;
 import com.theBarber.TheBarber.Client.model.AppointmentStatus;
 import com.theBarber.TheBarber.Client.repository.AppointmentRepository;
@@ -22,13 +21,6 @@ public class AppointmentValidator {
 
     private static final Duration ATTENDANCE_DURATION = Duration.ofMinutes(60);
     private final AppointmentRepository appointmentRepository;
-
-    public void validateBarberStatus(Barber barber) {
-        if (!barber.getStatus().equals(StatusBarber.ONLINE)) {
-            throw BarberException.build(HttpStatus.BAD_REQUEST,
-                    "O barbeiro precisa estar ONLINE para aceitar agendamentos.");
-        }
-    }
 
     public void validateAppointmentTime(Barber barber, LocalDateTime appointmentTime) {
         validateAppointmentInPast(appointmentTime);

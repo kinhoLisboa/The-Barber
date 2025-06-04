@@ -23,28 +23,29 @@ public class Barber {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
     private String name;
-    private String username;
     private String password;
+    @Column(unique = true, nullable = false)
     private String email;
     private String cpf;
     private String phone;
-    @Enumerated
-    private StatusBarber status = StatusBarber.OFFLINE;;
     @Embedded
     @Valid
     private Address address;
     @OneToMany(mappedBy = "barber")
     private List<Appointment> appointments = new ArrayList<>();
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
 
     public Barber(@Valid BarberRequest request, String encryptedPassword) {
         this.id =request.id();
         this.name = request.name();
-        this.username = request.username();
         this.password = encryptedPassword;
         this.email = request.email();
         this.cpf = request.cpf();
         this.phone = request.phone();
-        this.status = request.status() != null ? request.status() : StatusBarber.OFFLINE;
+        this.role = request.role() != null ? request.role() : Role.BARBEIRO;
         if (request.address() != null) {
             this.address = new Address(
                     request.address().getStreet(),

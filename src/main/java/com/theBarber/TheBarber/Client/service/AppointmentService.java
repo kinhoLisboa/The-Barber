@@ -1,8 +1,6 @@
 package com.theBarber.TheBarber.Client.service;
 
-import com.theBarber.TheBarber.Barber.DTO.UpdateBarber;
 import com.theBarber.TheBarber.Barber.model.Barber;
-import com.theBarber.TheBarber.Barber.model.StatusBarber;
 import com.theBarber.TheBarber.Barber.repository.BarberRepository;
 import com.theBarber.TheBarber.Client.DTO.*;
 import com.theBarber.TheBarber.Client.model.Appointment;
@@ -13,7 +11,6 @@ import com.theBarber.TheBarber.Client.repository.ClientRepository;
 import com.theBarber.TheBarber.TypeServices.DTO.ServiceTypeResponse;
 import com.theBarber.TheBarber.TypeServices.model.ServiceTypes;
 import com.theBarber.TheBarber.TypeServices.repository.ServiceTypeRepository;
-import com.theBarber.TheBarber.WSServices.WhatsAppService;
 import com.theBarber.TheBarber.handle.BarberException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -23,11 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,7 +42,6 @@ public class AppointmentService {
         Barber barber = existsBarber(barberId);
         Client client = existsClient(clientId);
 
-        appointmentValidator.validateBarberStatus(barber);
         appointmentValidator.validateAppointmentTime(barber, appointmentTime);
 
         Appointment appointment = create(barber, client, appointmentTime, servicesId);
@@ -100,15 +92,46 @@ public class AppointmentService {
         log.info("[Finish] AppointmentService - delete");
     }
 
-    public AppointmentResponse changeAppointmentStatus(UUID appointmentId, AppointmentStatus newStatus) {
-        log.info("[Init] AppointmentService - changeAppointmentStatus ");
+    public AppointmentResponse changeAppointmentStatus(UUID appointmentId, AppointmentStatus newStatus,
+                                                       String userEmailLogado) {
+        log.info("[Init] AppointmentService - changeAppointmentStatus");
+
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> BarberException.build(HttpStatus.NOT_FOUND, "Agendamento não encontrado"));
 
-        appointment.changeStatus(newStatus);
+        if (isBarber(userEmailLogado)) {
+            return processBarberStatusChange(appointment, newStatus);
+        }
+
+        return processClientStatusChange(appointment, newStatus, userEmailLogado);
+    }
+
+    private boolean isBarber(String userEmailLogado) {
+        return userEmailLogado != null && barberRepository.findByEmail(userEmailLogado).isPresent();
+    }
+
+    private AppointmentResponse processBarberStatusChange(Appointment appointment, AppointmentStatus newStatus) {
+        appointment.setStatus(newStatus);
         appointmentRepository.save(appointment);
-        log.info("[Finish] AppointmentService - changeAppointmentStatus ");
+
+        log.info("[Finish] AppointmentService - processBarberStatusChange");
         return new AppointmentResponse(appointment.getId(), appointment.getAppointmentTime(), appointment.getStatus());
+    }
+
+    private AppointmentResponse processClientStatusChange(Appointment appointment, AppointmentStatus newStatus, String userNameLogado) {
+        boolean isDono = userNameLogado != null && appointment.getClient().getName().equals(userNameLogado);
+
+        boolean podeConfirmar = appointment.getStatus() == AppointmentStatus.PENDING && newStatus == AppointmentStatus.CONFIRMED;
+
+        if ((userNameLogado == null || isDono) && podeConfirmar) {
+            appointment.setStatus(AppointmentStatus.CONFIRMED);
+            appointmentRepository.save(appointment);
+
+            log.info("[Finish] AppointmentService - processClientStatusChange");
+            return new AppointmentResponse(appointment.getId(), appointment.getAppointmentTime(), appointment.getStatus());
+        }
+
+        throw BarberException.build(HttpStatus.FORBIDDEN, "Cliente só pode confirmar agendamento pendente.");
     }
 
     private Barber existsBarber(UUID barberId) {
