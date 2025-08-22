@@ -1,14 +1,12 @@
 package com.theBarber.TheBarber.Barber.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.theBarber.TheBarber.Barber.DTO.BarberRequest;
 import com.theBarber.TheBarber.Barber.DTO.UpdateBarber;
 import com.theBarber.TheBarber.Client.model.Appointment;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +16,7 @@ import java.util.UUID;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = "appointments")
 public class Barber {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -32,6 +31,7 @@ public class Barber {
     @Valid
     private Address address;
     @OneToMany(mappedBy = "barber")
+    @JsonIgnore
     private List<Appointment> appointments = new ArrayList<>();
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

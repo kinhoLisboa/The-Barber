@@ -6,23 +6,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Component
 @RequiredArgsConstructor
 public class NotificationService {
 
-    private final WhatsAppService whatsappService;
+    private final WhatsAppService whatsAppService;
 
-    public void sendAppointmentConfirmation(Client client, LocalDateTime appointmentTime) {
-        String formattedPhone = formatPhone(client.getPhone());
-        String message = "✅ Olá, " + client.getName() + "! Seu agendamento foi confirmado para "
-                + appointmentTime.toLocalDate() + " às " + appointmentTime.toLocalTime() + ". Nos vemos em breve! ✂️💈";
-
-        try {
-            whatsappService.sendWhatsAppMessage(formattedPhone, message);
-        } catch (Exception e) {
-            // Logar erro ou tratar conforme necessidade
-        }
+    public void sendAppointmentConfirmationPending(Client client, LocalDateTime appointmentTime) {
+        String phone = formatPhone(client.getPhone());
+        String message = "Olá " + client.getName() +
+                "! Barbearia The Barber recebeu seu agendamento para " +
+                appointmentTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) +
+                ". Ele está *PENDENTE* e aguardando sua confirmação para garantirmos o seu atendimento. 💈 ";
+        whatsAppService.sendConfirmationMessage(phone, message);
     }
 
     private String formatPhone(String phone) {

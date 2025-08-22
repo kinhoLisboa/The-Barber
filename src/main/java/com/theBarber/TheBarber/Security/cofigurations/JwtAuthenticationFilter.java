@@ -1,6 +1,7 @@
 package com.theBarber.TheBarber.Security.cofigurations;
 
 import com.theBarber.TheBarber.Security.service.BarberUserDetailsService;
+import com.theBarber.TheBarber.Security.service.ClientUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,12 +21,13 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private JwtService jwtService;
-
-    private BarberUserDetailsService userDetailsService;
+    private BarberUserDetailsService barberUserDetailsService;
+    private ClientUserDetailsService clientUserDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
@@ -40,7 +42,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         username = jwtService.extractUsername(jwt);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+            String userType = jwtService.extractClaim(jwt, claims -> claims.get("type", String.class));
+            UserDetails userDetails;
+
+            if ("CLIENT".equalsIgnoreCase(userType)) {
+                userDetails = clientUserDetailsService.loadUserByUsername(username);
+            } else {
+                userDetails = barberUserDetailsService.loadUserByUsername(username);
+            }
+
             if (jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

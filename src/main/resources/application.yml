@@ -31,3 +31,8 @@ logging:
 jwt:
   secret: "3z!8Ue$L@V7jR9p^YgBxTzQ*FgPqHsKm"
 
+zapi:
+  instance-id: "3E611A687AC160061E7EF6976980F11A"
+  token: "52B74516991CF450D9BA7C47"
+  account-token: "F1d8e6a89323540be844a5badef2a13b9S"
+  base-url: "https://api.z-api.io"

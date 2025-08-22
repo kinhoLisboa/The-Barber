@@ -11,6 +11,7 @@ import com.theBarber.TheBarber.Client.repository.ClientRepository;
 import com.theBarber.TheBarber.TypeServices.DTO.ServiceTypeResponse;
 import com.theBarber.TheBarber.TypeServices.model.ServiceTypes;
 import com.theBarber.TheBarber.TypeServices.repository.ServiceTypeRepository;
+import com.theBarber.TheBarber.WSServices.WhatsAppService;
 import com.theBarber.TheBarber.handle.BarberException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -19,6 +20,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,6 +38,7 @@ public class AppointmentService {
     private final ServiceTypeRepository serviceTypeRepository;
     private final NotificationService notificationService;
     private final AppointmentValidator appointmentValidator;
+    private final WhatsAppService whatsAppService;
 
     public AppointmentResponse createAppointment(UUID barberId, UUID clientId,
                                                  LocalDateTime appointmentTime, List<UUID> servicesId) {
@@ -86,7 +90,7 @@ public class AppointmentService {
     public void delete(UUID id) {
         log.info("[Init] AppointmentService - delete");
         Appointment appointment = appointmentRepository.findById(id)
-                .orElseThrow(() -> BarberException.build(HttpStatus.BAD_REQUEST, "Agendamento não encontrado!"));
+                .orElseThrow(() -> BarberException.build(HttpStatus.NOT_FOUND, "Agendamento não encontrado!"));
         appointment.getServices().clear();
         appointmentRepository.delete(appointment);
         log.info("[Finish] AppointmentService - delete");
@@ -118,30 +122,31 @@ public class AppointmentService {
         return new AppointmentResponse(appointment.getId(), appointment.getAppointmentTime(), appointment.getStatus());
     }
 
-    private AppointmentResponse processClientStatusChange(Appointment appointment, AppointmentStatus newStatus, String userNameLogado) {
-        boolean isDono = userNameLogado != null && appointment.getClient().getName().equals(userNameLogado);
+    private AppointmentResponse processClientStatusChange(Appointment appointment, AppointmentStatus newStatus, String userEmailLogado) {
+        boolean isDono = userEmailLogado != null && appointment.getClient().getEmail().equals(userEmailLogado);
 
         boolean podeConfirmar = appointment.getStatus() == AppointmentStatus.PENDING && newStatus == AppointmentStatus.CONFIRMED;
 
-        if ((userNameLogado == null || isDono) && podeConfirmar) {
+        if ((userEmailLogado == null || isDono) && podeConfirmar) {
             appointment.setStatus(AppointmentStatus.CONFIRMED);
             appointmentRepository.save(appointment);
 
             log.info("[Finish] AppointmentService - processClientStatusChange");
+
             return new AppointmentResponse(appointment.getId(), appointment.getAppointmentTime(), appointment.getStatus());
         }
 
-        throw BarberException.build(HttpStatus.FORBIDDEN, "Cliente só pode confirmar agendamento pendente.");
+        throw BarberException.build(HttpStatus.FORBIDDEN, "Cliente só pode confirmar agendamento.");
     }
 
     private Barber existsBarber(UUID barberId) {
         return barberRepository.findById(barberId)
-                .orElseThrow(() -> BarberException.build(HttpStatus.BAD_REQUEST, "Barbeiro não encontrado"));
+                .orElseThrow(() -> BarberException.build(HttpStatus.NOT_FOUND, "Barbeiro não encontrado"));
     }
 
     private Client existsClient(UUID clientId) {
         return clientRepository.findById(clientId)
-                .orElseThrow(() -> BarberException.build(HttpStatus.BAD_REQUEST, "Cliente não encontrado"));
+                .orElseThrow(() -> BarberException.build(HttpStatus.NOT_FOUND, "Cliente não encontrado"));
     }
 
     private Appointment create(Barber barber, Client client, LocalDateTime appointmentTime, List<UUID> servicesId) {
@@ -157,7 +162,8 @@ public class AppointmentService {
         appointment.setServices(services);
         appointment = appointmentRepository.save(appointment);
 
-        notificationService.sendAppointmentConfirmation(client, appointment.getAppointmentTime());
+        notificationService.sendAppointmentConfirmationPending(client, appointment.getAppointmentTime());
+
         return appointment;
     }
 

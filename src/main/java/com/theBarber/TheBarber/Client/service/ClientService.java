@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -20,13 +21,15 @@ import java.util.UUID;
 public class ClientService {
 
     private final ClientRepository repository;
+    private final PasswordEncoder passwordEncoder;
 
     public ClientResponse register(CLientRequest request) {
         log.info("[Init] ClientService - register ");
         if(repository.existsByEmail(request.email())) {
             throw BarberException.build(HttpStatus.BAD_REQUEST, " Esse email ja existe!");
         }
-        Client client = repository.save(new Client(request));
+        String encryptedPassword = passwordEncoder.encode(request.password());
+        Client client = repository.save(new Client(request,encryptedPassword));
         log.info("[Finish] ClientService - register ");
         return new ClientResponse(client.getId(), client.getName(), client.getEmail(), client.getPhone());
     }

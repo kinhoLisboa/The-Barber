@@ -1,13 +1,11 @@
 package com.theBarber.TheBarber.Client.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.theBarber.TheBarber.Barber.model.Barber;
 import com.theBarber.TheBarber.TypeServices.model.ServiceTypes;
 import com.theBarber.TheBarber.handle.BarberException;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
@@ -19,6 +17,7 @@ import java.util.UUID;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = {"client", "barber", "services"})
 public class Appointment {
 
     @Id
@@ -27,6 +26,7 @@ public class Appointment {
 
     @ManyToOne
     @JoinColumn(name = "barber_id", nullable = false)
+    @JsonIgnore
     private Barber barber;
 
     @ManyToOne

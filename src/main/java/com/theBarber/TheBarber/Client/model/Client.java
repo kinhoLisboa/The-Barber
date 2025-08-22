@@ -3,10 +3,7 @@ package com.theBarber.TheBarber.Client.model;
 import com.theBarber.TheBarber.Client.DTO.CLientRequest;
 import com.theBarber.TheBarber.Client.DTO.UpdateClient;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +13,7 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString(exclude = "appointments")
 public class Client {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -29,11 +27,11 @@ public class Client {
     private List<Appointment> appointments = new ArrayList<>();
 
 
-    public Client(CLientRequest request) {
+    public Client(CLientRequest request, String encryptedPassword) {
         this.id = request.id();
         this.name = request.name();
         this.email = request.email();
-        this.password = request.password();
+        this.password = encryptedPassword;
         this.phone = request.phone();
     }
 

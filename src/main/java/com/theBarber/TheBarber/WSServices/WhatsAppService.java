@@ -2,37 +2,33 @@ package com.theBarber.TheBarber.WSServices;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
-
-import java.util.Map;
 @Log4j2
 @Service
 @RequiredArgsConstructor
 public class WhatsAppService {
 
-    private final WhatsAppClient whatsAppClient;
-    private final String TOKEN = "2381E4A2AE4DA5D7791337D1";
+    private final WhatsAppClient whatsappClient;
 
-    public void sendWhatsAppMessage(String phone, String message) {
-        // Remover caracteres não numéricos do número do telefone
-        String formattedPhone = phone.replaceAll("[^0-9]", "");
-        if (!formattedPhone.startsWith("55")) {
-            formattedPhone = "55" + formattedPhone; // Adiciona DDI do Brasil se não tiver
-        }
+    @Value("${zapi.instance-id}")
+    private String instanceId;
 
-        Map<String, String> requestBody = Map.of(
-                "phone", formattedPhone,
-                "message", message
-        );
+    @Value("${zapi.token}")
+    private String token;
 
-        try {
-            ResponseEntity<String> response = whatsAppClient.sendWhatsAppMessage(TOKEN, requestBody);
-            log.info("Resposta da API: {}", response.getBody());
-        } catch (Exception e) {
-            log.error("Erro ao enviar mensagem para {}: {}", phone, e.getMessage(), e);
-        }
+    @Value("${zapi.account-token}")
+    private String accountToken;
+
+    public void sendConfirmationMessage(String phone, String message) {
+        System.out.println("Enviando mensagem para: " + phone);
+        System.out.println("Conteúdo: " + message);
+        WhatsAppMessageRequest request = new WhatsAppMessageRequest(phone, message);
+        whatsappClient.sendMessage(instanceId, token, request, accountToken);
     }
 }
 
