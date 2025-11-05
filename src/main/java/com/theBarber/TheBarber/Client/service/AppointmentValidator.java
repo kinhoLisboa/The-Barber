@@ -22,6 +22,19 @@ public class AppointmentValidator {
     private static final Duration ATTENDANCE_DURATION = Duration.ofMinutes(60);
     private final AppointmentRepository appointmentRepository;
 
+    public void validateClientPermission(Appointment appointment, String userEmailLogado, AppointmentStatus newStatus) {
+        boolean usuarioValido = userEmailLogado == null || appointment.getClient().getEmail().equals(userEmailLogado);
+        boolean statusPodeSerConfirmado = appointment.getStatus().equals(newStatus);
+
+        if (!usuarioValido) {
+            throw BarberException.build(HttpStatus.FORBIDDEN, "Apenas o cliente dono do agendamento pode alterá-lo.");
+        }
+
+        if (statusPodeSerConfirmado) {
+            throw BarberException.build(HttpStatus.FORBIDDEN, "Agendamento não pode ser confirmado neste estado.");
+        }
+    }
+
     public void validateAppointmentTime(Barber barber, LocalDateTime appointmentTime) {
         validateAppointmentInPast(appointmentTime);
         validateAppointmentWithinBusinessHours(appointmentTime);
@@ -72,19 +85,23 @@ public class AppointmentValidator {
         List<Appointment> appointments = appointmentRepository.findByBarberId(barber.getId());
 
         if (!appointments.isEmpty()) {
-            Appointment lastAppointment = appointments.stream()
-                    .max(Comparator.comparing(Appointment::getAppointmentTime))
-                    .orElseThrow(() -> BarberException.build(HttpStatus.BAD_REQUEST,
-                            "Erro ao encontrar o último agendamento"));
+            LocalDateTime newStart = appointmentTime;
+            LocalDateTime newEnd = appointmentTime.plusMinutes(60);
 
-            if (lastAppointment.getStatus() == AppointmentStatus.FINALIZED) {
-                return;
-            }
+            for (Appointment existing : appointments) {
 
-            LocalDateTime lastStartTime = lastAppointment.getAppointmentTime();
-            if (appointmentTime.isBefore(lastStartTime.plusMinutes(60))) {
-                throw BarberException.build(HttpStatus.CONFLICT,
-                        "O novo agendamento deve ser feito pelo menos 60 minutos após o início do agendamento anterior.");
+                if (existing.getAppointmentTime().toLocalDate().equals(newStart.toLocalDate())) {
+
+                    LocalDateTime existingStart = existing.getAppointmentTime();
+                    LocalDateTime existingEnd = existingStart.plusMinutes(60);
+
+                    boolean overlap = newStart.isBefore(existingEnd) && newEnd.isAfter(existingStart);
+
+                    if (overlap) {
+                        throw BarberException.build(HttpStatus.CONFLICT,
+                                "Conflito de horário: cada agendamento deve ter pelo menos 60 minutos de duração.");
+                    }
+                }
             }
         }
     }

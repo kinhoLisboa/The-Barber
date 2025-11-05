@@ -37,7 +37,6 @@ public class BarberService {
         return new BarberResponse( barber.getId(), barber.getName(),barber.getEmail(),
                 barber.getCpf(),barber.getPhone());
 
-
     }
 
     public Page<ListResponseBarber> list(int page, int size) {
@@ -73,10 +72,11 @@ public class BarberService {
         log.info("[Finish] BarberService - delete ");
     }
 
-    public void existsBarber(UUID id) {
-        if (!repository.existsById(id)) {
-            throw BarberException.build(HttpStatus.BAD_REQUEST, "Barbeiro não encontrado !");
-        }
+    public Barber existsBarber(UUID id) {
+       return repository.findById(id)
+               .orElseThrow(()-> BarberException.build(HttpStatus.BAD_REQUEST,
+                       "Barbeiro não encontrado !"));
+
     }
     public void existsAdmin(BarberRequest request){
         if (request.role() == Role.BARBEIRO && !repository.existsByRole(Role.ADMIN)) {
@@ -109,6 +109,9 @@ public class BarberService {
                 throw BarberException.build(HttpStatus.BAD_REQUEST,"Apenas administradores podem cadastrar barbeiros.");
             }
         }
+    }
+    public boolean isBarber(String userEmailLogado) {
+        return userEmailLogado != null && repository.findByEmail(userEmailLogado).isPresent();
     }
 
 

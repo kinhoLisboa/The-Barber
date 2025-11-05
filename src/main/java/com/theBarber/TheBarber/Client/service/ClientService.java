@@ -45,7 +45,6 @@ public class ClientService {
         return clients.map(ListResponseClient::list);
     }
 
-
     public ClientDetailed fetch(UUID id) {
         log.info("[Init] ClientService - fetch ");
         exists(id);
@@ -76,5 +75,9 @@ public class ClientService {
         if(!repository.existsById(id)){
             throw BarberException.build(HttpStatus.BAD_REQUEST,"Cliente não encontrado !");
         }
+    }
+    public Client existsClient(UUID clientId) {
+        return repository.findById(clientId)
+                .orElseThrow(() -> BarberException.build(HttpStatus.NOT_FOUND, "Cliente não encontrado"));
     }
 }
