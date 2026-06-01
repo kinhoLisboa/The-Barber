@@ -1,0 +1,14 @@
+server:
+  port: 8092
+
+app:
+  instance-id: 2
+
+
+
+
+
+
+
+
+
