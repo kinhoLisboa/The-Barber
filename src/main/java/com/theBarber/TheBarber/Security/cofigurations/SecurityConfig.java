@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/auth/cliente/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/barbeiro").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/barbeiro/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/clientes").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/agendamentos/*/status").hasAnyRole("CLIENT", "ADMIN")

@@ -1,21 +1,20 @@
 spring:
+
   datasource:
     url: jdbc:mysql://localhost:3306/TheBarber?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
     password: 2402
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   rabbitmq:
     host: localhost
     port: 5672
     username: guest
     password: guest
 
-  notification:
-    exchange: notification.exchange
-    routing-key: notification.whatsapp
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -24,6 +23,10 @@ spring:
   h2:
     console:
       enabled: false
+
+notification:
+  exchange: notification.exchange
+  routing-key: notification.whatsapp
 
 feign:
   client:
@@ -38,3 +41,16 @@ logging:
 
 jwt:
   secret: "3z!8Ue$L@V7jR9p^YgBxTzQ*FgPqHsKm"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    prometheus:
+      enabled: true
+  metrics:
+    enable:
+      all: true
+kind: Application

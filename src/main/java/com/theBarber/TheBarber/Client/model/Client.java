@@ -35,8 +35,8 @@ public class Client {
         this.phone = request.phone();
     }
 
-
     public Client(UpdateClient client) {
+        this.name = client.name();
         this.email = client.email();
         this.phone = client.phone();
     }

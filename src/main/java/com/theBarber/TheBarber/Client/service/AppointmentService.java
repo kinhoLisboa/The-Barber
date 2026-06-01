@@ -11,7 +11,7 @@ import com.theBarber.TheBarber.Client.repository.AppointmentRepository;
 import com.theBarber.TheBarber.TypeServices.DTO.ServiceTypeResponse;
 import com.theBarber.TheBarber.TypeServices.model.ServiceTypes;
 import com.theBarber.TheBarber.TypeServices.repository.ServiceTypeRepository;
-import com.theBarber.TheBarber.WSServices.NotifierAppointment;
+import com.theBarber.TheBarber.event.publisher.AppointmentEventPublisher;
 import com.theBarber.TheBarber.handle.BarberException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -35,7 +35,7 @@ public class AppointmentService {
     private final AppointmentValidator appointmentValidator;
     private final ClientService clientService;
     private final BarberService barberService;
-    private final NotifierAppointment notifierAppointment;
+    private final AppointmentEventPublisher appointmentEventPublisher;
 
     public AppointmentResponse createAppointment(UUID barberId, UUID clientId,
                                                  LocalDateTime appointmentTime, List<UUID> servicesId) {
@@ -107,7 +107,8 @@ public class AppointmentService {
         log.info("[Init] AppointmentService - processBarberStatusChange");
         appointment.setStatus(newStatus);
         appointmentRepository.save(appointment);
-        notifierAppointment.notifyConfirmed(appointment);
+        appointmentEventPublisher.publishCreated(appointment);
+        appointmentEventPublisher.publishConfirmed(appointment);
         log.info("[Finish] AppointmentService - processBarberStatusChange");
         return new AppointmentResponse(appointment.getId(), appointment.getAppointmentTime(),
                 appointment.getStatus());
@@ -119,24 +120,31 @@ public class AppointmentService {
         appointmentValidator.validateClientPermission(appointment, userEmailLogado, newStatus);
         appointment.setStatus(newStatus);
         appointmentRepository.save(appointment);
-        notifierAppointment.notifyConfirmed(appointment);
+        appointmentEventPublisher.publishConfirmed(appointment);
+        appointmentEventPublisher.publishCanceled(appointment);
         log.info("[Finish] AppointmentService - processClientStatusChange");
         return new AppointmentResponse(appointment.getId(), appointment.getAppointmentTime(),
                 appointment.getStatus());
     }
 
-    private Appointment create(Barber barber, Client client, LocalDateTime appointmentTime, List<UUID> servicesId) {
+    private Appointment create(Barber barber, Client client,
+                               LocalDateTime appointmentTime,
+                               List<UUID> servicesId) {
+
         List<ServiceTypes> services = serviceTypeRepository.findAllById(servicesId);
+
         if (services.isEmpty()) {
             throw BarberException.build(HttpStatus.NOT_FOUND, "Serviços não encontrados!");
         }
+
         Appointment appointment = new Appointment();
         appointment.setBarber(barber);
         appointment.setClient(client);
         appointment.setAppointmentTime(appointmentTime);
         appointment.setServices(services);
+
         appointment = appointmentRepository.save(appointment);
-        notifierAppointment.notifyCreated(appointment);
+        appointmentEventPublisher.publishCreated(appointment);
 
         return appointment;
     }
