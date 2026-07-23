@@ -22,7 +22,7 @@ public class ClientController {
     private final ClientService service;
 
     @PostMapping
-    public ResponseEntity<ClientResponse> create (@Valid @RequestBody CLientRequest request){
+    public ResponseEntity<ClientResponse> create (@Valid @RequestBody ClientRequest request){
         log.info("[Init] ClientController - create ");
         ClientResponse client = service.register(request);
         URI location = URI.create("/clientes/" + client.id());

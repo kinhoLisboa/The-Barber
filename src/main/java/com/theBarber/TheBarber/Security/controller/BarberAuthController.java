@@ -2,7 +2,7 @@ package com.theBarber.TheBarber.Security.controller;
 
 import com.theBarber.TheBarber.Security.DTO.AuthenticationBarberRequest;
 import com.theBarber.TheBarber.Security.DTO.AuthenticationBarberResponse;
-import com.theBarber.TheBarber.Security.cofigurations.JwtService;
+import com.theBarber.TheBarber.Security.configurations.JwtService;
 import com.theBarber.TheBarber.Security.service.BarberUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

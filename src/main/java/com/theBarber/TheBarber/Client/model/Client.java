@@ -1,6 +1,6 @@
 package com.theBarber.TheBarber.Client.model;
 
-import com.theBarber.TheBarber.Client.DTO.CLientRequest;
+import com.theBarber.TheBarber.Client.DTO.ClientRequest;
 import com.theBarber.TheBarber.Client.DTO.UpdateClient;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,7 +27,7 @@ public class Client {
     private List<Appointment> appointments = new ArrayList<>();
 
 
-    public Client(CLientRequest request, String encryptedPassword) {
+    public Client(ClientRequest request, String encryptedPassword) {
         this.id = request.id();
         this.name = request.name();
         this.email = request.email();

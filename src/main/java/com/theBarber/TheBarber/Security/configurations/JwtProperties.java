@@ -1,4 +1,4 @@
-package com.theBarber.TheBarber.Security.cofigurations;
+package com.theBarber.TheBarber.Security.configurations;
 
 import lombok.Getter;
 import lombok.Setter;

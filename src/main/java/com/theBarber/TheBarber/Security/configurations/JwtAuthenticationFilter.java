@@ -1,4 +1,4 @@
-package com.theBarber.TheBarber.Security.cofigurations;
+package com.theBarber.TheBarber.Security.configurations;
 
 import com.theBarber.TheBarber.Security.service.BarberUserDetailsService;
 import com.theBarber.TheBarber.Security.service.ClientUserDetailsService;

@@ -66,7 +66,8 @@ public class AppointmentService {
                                                                  UpdateAppointmentRequest updateRequest) {
         log.info("[Init] AppointmentService - updateAppointmentByClientId");
         clientService.existsClient(clientId);
-        Appointment appointment = appointmentRepository.findByClientId(clientId).get();
+        Appointment appointment = appointmentRepository.findByClientId(clientId)
+                .orElseThrow(() -> BarberException.build(HttpStatus.NOT_FOUND, "Agendamento não encontrado para esse cliente!"));
 
         if (updateRequest.newDate() != null) {
             appointment.setAppointmentTime(updateRequest.newDate());
@@ -86,6 +87,7 @@ public class AppointmentService {
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> BarberException.build(HttpStatus.NOT_FOUND, "Agendamento não encontrado!"));
         appointment.getServices().clear();
+        appointmentRepository.save(appointment);
         appointmentRepository.delete(appointment);
         log.info("[Finish] AppointmentService - delete");
     }
@@ -105,7 +107,7 @@ public class AppointmentService {
 
     private AppointmentResponse processBarberStatusChange(Appointment appointment, AppointmentStatus newStatus) {
         log.info("[Init] AppointmentService - processBarberStatusChange");
-        appointment.setStatus(newStatus);
+        appointment.changeStatus(newStatus);
         appointmentRepository.save(appointment);
         appointmentEventPublisher.publishCreated(appointment);
         appointmentEventPublisher.publishConfirmed(appointment);
@@ -118,7 +120,7 @@ public class AppointmentService {
                                                           String userEmailLogado) {
         log.info("[Init] AppointmentService - processClientStatusChange");
         appointmentValidator.validateClientPermission(appointment, userEmailLogado, newStatus);
-        appointment.setStatus(newStatus);
+        appointment.changeStatus(newStatus);
         appointmentRepository.save(appointment);
         appointmentEventPublisher.publishConfirmed(appointment);
         appointmentEventPublisher.publishCanceled(appointment);

@@ -38,6 +38,7 @@ public class Appointment {
     private LocalDateTime appointmentTime;
 
     @Enumerated(EnumType.STRING)
+    @Setter(AccessLevel.PRIVATE)
     private AppointmentStatus status = AppointmentStatus.PENDING;
 
     @ManyToMany

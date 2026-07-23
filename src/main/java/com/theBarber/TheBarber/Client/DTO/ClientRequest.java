@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 
 import java.util.UUID;
 
-public record CLientRequest(
+public record ClientRequest(
 
         UUID id,
 

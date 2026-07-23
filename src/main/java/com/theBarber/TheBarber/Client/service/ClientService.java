@@ -23,7 +23,7 @@ public class ClientService {
     private final ClientRepository repository;
     private final PasswordEncoder passwordEncoder;
 
-    public ClientResponse register(CLientRequest request) {
+    public ClientResponse register(ClientRequest request) {
         log.info("[Init] ClientService - register ");
         if(repository.existsByEmail(request.email())) {
             throw BarberException.build(HttpStatus.BAD_REQUEST, " Esse email ja existe!");
@@ -39,7 +39,7 @@ public class ClientService {
         Pageable pageable = PageRequest.of(page, size);
         Page<Client> clients = repository.findAll(pageable);
         if( clients.isEmpty()){
-            BarberException.build(HttpStatus.NOT_FOUND,"Nenhum cliente encontrado!");
+           throw BarberException.build(HttpStatus.NOT_FOUND,"Nenhum cliente encontrado!");
         }
         log.info("[Finish] ClientService - list ");
         return clients.map(ListResponseClient::list);
@@ -48,7 +48,8 @@ public class ClientService {
     public ClientDetailed fetch(UUID id) {
         log.info("[Init] ClientService - fetch ");
         exists(id);
-        Client findBy = repository.findById(id).get();
+        Client findBy = repository.findById(id)
+                .orElseThrow(() -> BarberException.build(HttpStatus.NOT_FOUND, "Cliente não encontrado"));
         log.info("[Finish] ClientService - fetch ");
         return new ClientDetailed(
                  findBy.getName(),findBy.getEmail(),findBy.getPhone());

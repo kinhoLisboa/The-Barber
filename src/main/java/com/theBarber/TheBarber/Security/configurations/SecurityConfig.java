@@ -1,4 +1,4 @@
-package com.theBarber.TheBarber.Security.cofigurations;
+package com.theBarber.TheBarber.Security.configurations;
 
 import com.theBarber.TheBarber.Security.service.BarberUserDetailsService;
 import com.theBarber.TheBarber.Security.service.ClientUserDetailsService;
@@ -53,15 +53,20 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
-
     @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return new ProviderManager(
+                List.of(barberAuthenticationProvider(),clientAuthenticationProvider())
+        );
+    }
+
     public AuthenticationProvider barberAuthenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(barberUserDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
-    @Bean
+
     public AuthenticationProvider clientAuthenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(clientUserDetailsService);
@@ -74,11 +79,5 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return new ProviderManager(
-                List.of(barberAuthenticationProvider(),clientAuthenticationProvider())
-        );
-    }
 
 }
